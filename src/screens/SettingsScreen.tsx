@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Text, List, Switch, Divider, Button, TextInput, Dialog, Portal, Chip } from 'react-native-paper';
+import { Text, List, Switch, Divider, Button, TextInput, Dialog, Portal, Chip, SegmentedButtons } from 'react-native-paper';
 import {
   APIKeys,
   AI_MODELS,
@@ -10,7 +10,18 @@ import {
   getSelectedModel,
   saveSelectedModel,
   hasAPIKey,
+  getFreeModels,
+  getLowPriceModels,
+  getStandardModels,
+  getPremiumModels,
 } from '../stores/apiKeys';
+
+const PRICE_GROUPS = [
+  { key: 'free', label: '🆓 免費', getModels: getFreeModels },
+  { key: 'low', label: '💰 低價', getModels: getLowPriceModels },
+  { key: 'standard', label: '⭐ 標準', getModels: getStandardModels },
+  { key: 'premium', label: '💎 高價', getModels: getPremiumModels },
+];
 
 export default function SettingsScreen() {
   const [darkMode, setDarkMode] = useState(false);
@@ -20,6 +31,7 @@ export default function SettingsScreen() {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [editingModel, setEditingModel] = useState<AIModel | null>(null);
   const [tempApiKey, setTempApiKey] = useState('');
+  const [activeGroup, setActiveGroup] = useState('free');
 
   useEffect(() => {
     loadSettings();
@@ -48,7 +60,6 @@ export default function SettingsScreen() {
     setEditingModel(null);
     setTempApiKey('');
     
-    // 如果這是第一個 API key，自動選擇這個模型
     if (!selectedModel && tempApiKey) {
       await saveSelectedModel(editingModel);
       setSelectedModel(editingModel);
@@ -58,7 +69,8 @@ export default function SettingsScreen() {
   const selectModel = async (model: AIModel) => {
     const hasKey = await hasAPIKey(model);
     if (!hasKey) {
-      Alert.alert('未設置 API Key', `請先為 ${AI_MODELS.find(m => m.id === model)?.name} 設置 API Key`);
+      const modelInfo = AI_MODELS.find(m => m.id === model);
+      Alert.alert('未設置 API Key', `請先為 ${modelInfo?.name} 設置 API Key`);
       return;
     }
     await saveSelectedModel(model);
@@ -78,52 +90,84 @@ export default function SettingsScreen() {
     return '#999';
   };
 
+  const renderModelItem = (model: typeof AI_MODELS[0]) => (
+    <List.Item
+      key={model.id}
+      title={`${model.name}`}
+      description={`${model.description} · ${getModelStatus(model.id)}`}
+      left={() => (
+        <View style={styles.iconContainer}>
+          <List.Icon icon={model.icon} color={getModelStatusColor(model.id)} />
+          <Chip style={[styles.priceChip, { backgroundColor: getPriceColor(model.price) }]}>
+            {model.price}
+          </Chip>
+        </View>
+      )}
+      right={() => (
+        <View style={styles.itemButtons}>
+          {apiKeys[model.id] ? (
+            <Chip 
+              mode="outlined" 
+              onPress={() => selectModel(model.id)}
+              style={[
+                styles.chip,
+                selectedModel === model.id && styles.selectedChip
+              ]}
+              textStyle={selectedModel === model.id ? styles.selectedChipText : undefined}
+            >
+              {selectedModel === model.id ? '使用中' : '選擇'}
+            </Chip>
+          ) : null}
+          <Button
+            mode="text"
+            onPress={() => openApiKeyDialog(model.id)}
+            compact
+          >
+            {apiKeys[model.id] ? '編輯' : '添加'}
+          </Button>
+        </View>
+      )}
+    />
+  );
+
+  const getPriceColor = (price: string) => {
+    switch (price) {
+      case '免費': return '#E8F5E9';
+      case '低價': return '#FFF3E0';
+      case '標準': return '#E3F2FD';
+      case '高價': return '#FCE4EC';
+      default: return '#F5F5F5';
+    }
+  };
+
+  const currentGroup = PRICE_GROUPS.find(g => g.key === activeGroup);
+  const displayModels = currentGroup?.getModels() || [];
+
   return (
     <ScrollView style={styles.container}>
       <Text variant="headlineMedium" style={styles.title}>設置</Text>
 
       {/* AI API 配置 */}
       <List.Section>
-        <List.Subheader>🤖 AI 模型配置</List.Subheader>
-        <Text style={styles.sectionDesc}>選擇並配置你想使用的 AI 模型</Text>
+        <List.Subheader>🤖 AI 模型配置 ({AI_MODELS.length} 個模型)</List.Subheader>
+        <Text style={styles.sectionDesc}>按價格分類，選擇適合你的模型</Text>
         
-        {AI_MODELS.map((model) => (
-          <List.Item
-            key={model.id}
-            title={`${model.name} ${model.version}`}
-            description={`${model.description} · ${getModelStatus(model.id)}`}
-            left={() => (
-              <List.Icon 
-                icon={model.icon} 
-                color={getModelStatusColor(model.id)}
-              />
-            )}
-            right={() => (
-              <View style={styles.itemButtons}>
-                {apiKeys[model.id] ? (
-                  <Chip 
-                    mode="outlined" 
-                    onPress={() => selectModel(model.id)}
-                    style={[
-                      styles.chip,
-                      selectedModel === model.id && styles.selectedChip
-                    ]}
-                    textStyle={selectedModel === model.id ? styles.selectedChipText : undefined}
-                  >
-                    {selectedModel === model.id ? '使用中' : '選擇'}
-                  </Chip>
-                ) : null}
-                <Button
-                  mode="text"
-                  onPress={() => openApiKeyDialog(model.id)}
-                  compact
-                >
-                  {apiKeys[model.id] ? '編輯' : '添加'}
-                </Button>
-              </View>
-            )}
-          />
-        ))}
+        {/* 價格分組選擇 */}
+        <SegmentedButtons
+          value={activeGroup}
+          onValueChange={setActiveGroup}
+          buttons={PRICE_GROUPS.map(g => ({ value: g.key, label: g.label }))}
+          style={styles.segmentButtons}
+        />
+
+        {/* 當前分組的模型列表 */}
+        <View style={styles.modelList}>
+          {displayModels.length > 0 ? (
+            displayModels.map(renderModelItem)
+          ) : (
+            <Text style={styles.emptyText}>此分類暫無模型</Text>
+          )}
+        </View>
       </List.Section>
 
       <Divider />
@@ -160,12 +204,12 @@ export default function SettingsScreen() {
         <List.Subheader>關於</List.Subheader>
         <List.Item
           title="版本"
-          description="1.1.0 - AI 增強版"
+          description="1.3.0 - AI 多版本版"
           left={() => <List.Icon icon="information" />}
         />
         <List.Item
           title="龍蝦仔"
-          description="支持 7+ 個 AI 模型"
+          description={`支持 ${AI_MODELS.length} 個 AI 模型`}
           left={() => <List.Icon icon="robot" />}
         />
       </List.Section>
@@ -221,6 +265,21 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 14,
   },
+  segmentButtons: {
+    marginHorizontal: 16,
+    marginBottom: 10,
+  },
+  modelList: {
+    marginTop: 5,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  priceChip: {
+    height: 20,
+    marginTop: -5,
+  },
   itemButtons: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -233,6 +292,11 @@ const styles = StyleSheet.create({
   },
   selectedChipText: {
     color: '#fff',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#999',
+    padding: 20,
   },
   apiKeyInput: {
     marginTop: 10,

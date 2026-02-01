@@ -3,74 +3,209 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const API_KEYS_STORAGE_KEY = '@ai_api_keys';
 const SELECTED_MODEL_STORAGE_KEY = '@selected_ai_model';
 
-export type AIModel = 'gemini' | 'claude' | 'gpt' | 'kimi' | 'glm' | 'qwen' | 'deepseek';
+// 擴展模型列表，包含多個版本
+export type AIModel = 
+  // Gemini 系列
+  | 'gemini-3-pro' | 'gemini-3-flash' | 'gemini-2.5-flash-lite'
+  // Claude 系列
+  | 'claude-opus-4.5' | 'claude-sonnet-4.5'
+  // GPT 系列
+  | 'gpt-5' | 'gpt-5-mini' | 'gpt-5-nano'
+  // Kimi 系列
+  | 'kimi-k2.5' | 'kimi-k2'
+  // GLM 系列
+  | 'glm-4.7' | 'glm-4-flash' | 'glm-4-air'
+  // Qwen 系列
+  | 'qwen3-max' | 'qwen3-72b' | 'qwen3-32b'
+  // DeepSeek 系列
+  | 'deepseek-v3.2' | 'deepseek-reasoner';
 
 export interface APIKeys {
-  gemini?: string;
-  claude?: string;
-  gpt?: string;
-  kimi?: string;
-  glm?: string;
-  qwen?: string;
-  deepseek?: string;
+  'gemini-3-pro'?: string;
+  'gemini-3-flash'?: string;
+  'gemini-2.5-flash-lite'?: string;
+  'claude-opus-4.5'?: string;
+  'claude-sonnet-4.5'?: string;
+  'gpt-5'?: string;
+  'gpt-5-mini'?: string;
+  'gpt-5-nano'?: string;
+  'kimi-k2.5'?: string;
+  'kimi-k2'?: string;
+  'glm-4.7'?: string;
+  'glm-4-flash'?: string;
+  'glm-4-air'?: string;
+  'qwen3-max'?: string;
+  'qwen3-72b'?: string;
+  'qwen3-32b'?: string;
+  'deepseek-v3.2'?: string;
+  'deepseek-reasoner'?: string;
 }
 
-// 2026年2月最新模型列表
+// 2026年2月最新模型列表（多版本）
 export const AI_MODELS: { 
   id: AIModel; 
   name: string; 
   icon: string;
   version: string;
   description: string;
+  price: '免費' | '低價' | '標準' | '高價';
 }[] = [
+  // ===== Google Gemini 系列 =====
   { 
-    id: 'gemini', 
-    name: 'Google Gemini', 
+    id: 'gemini-3-pro', 
+    name: 'Gemini 3 Pro', 
     icon: 'google',
     version: '3 Pro',
-    description: '2M+ tokens, 最強多模態'
+    description: '2M tokens, 最強多模態',
+    price: '免費'
   },
   { 
-    id: 'claude', 
-    name: 'Claude', 
+    id: 'gemini-3-flash', 
+    name: 'Gemini 3 Flash', 
+    icon: 'lightning-bolt',
+    version: '3 Flash',
+    description: '1M tokens, 快速高效',
+    price: '免費'
+  },
+  { 
+    id: 'gemini-2.5-flash-lite', 
+    name: 'Gemini 2.5 Flash Lite', 
+    icon: 'flash',
+    version: '2.5 Flash Lite',
+    description: '高性價比、大量調用',
+    price: '免費'
+  },
+  
+  // ===== Claude 系列 =====
+  { 
+    id: 'claude-opus-4.5', 
+    name: 'Claude Opus 4.5', 
     icon: 'triangle',
     version: 'Opus 4.5',
-    description: '200K tokens, 世界最強編程'
+    description: '200K tokens, 世界最強編程',
+    price: '高價'
   },
   { 
-    id: 'gpt', 
-    name: 'OpenAI GPT', 
+    id: 'claude-sonnet-4.5', 
+    name: 'Claude Sonnet 4.5', 
+    icon: 'triangle-outline',
+    version: 'Sonnet 4.5',
+    description: '200K tokens, 最對齊安全',
+    price: '標準'
+  },
+  
+  // ===== OpenAI GPT 系列 =====
+  { 
+    id: 'gpt-5', 
+    name: 'GPT-5', 
     icon: 'openai',
     version: 'GPT-5',
-    description: '256K tokens, 統一系統'
+    description: '256K tokens, 統一系統',
+    price: '高價'
   },
   { 
-    id: 'kimi', 
-    name: 'Kimi (Moonshot)', 
+    id: 'gpt-5-mini', 
+    name: 'GPT-5 Mini', 
+    icon: 'openai',
+    version: 'GPT-5 Mini',
+    description: '128K tokens, 快速輕量',
+    price: '低價'
+  },
+  { 
+    id: 'gpt-5-nano', 
+    name: 'GPT-5 Nano', 
+    icon: 'openai',
+    version: 'GPT-5 Nano',
+    description: '128K tokens, 最快最省',
+    price: '低價'
+  },
+  
+  // ===== Kimi 系列 =====
+  { 
+    id: 'kimi-k2.5', 
+    name: 'Kimi K2.5', 
     icon: 'star',
     version: 'K2.5',
-    description: '256K tokens, 中文最強'
+    description: '256K tokens, 中文最強',
+    price: '標準'
   },
   { 
-    id: 'glm', 
-    name: '智谱 GLM', 
+    id: 'kimi-k2', 
+    name: 'Kimi K2', 
+    icon: 'star-outline',
+    version: 'K2',
+    description: '200K tokens, 性價比高',
+    price: '低價'
+  },
+  
+  // ===== 智谱 GLM 系列 =====
+  { 
+    id: 'glm-4.7', 
+    name: 'GLM-4.7', 
     icon: 'brain',
     version: 'GLM-4.7',
-    description: '128K tokens, 完全免費'
+    description: '128K tokens, 國產最強',
+    price: '免費'
   },
   { 
-    id: 'qwen', 
-    name: '通义千问', 
+    id: 'glm-4-flash', 
+    name: 'GLM-4-Flash', 
+    icon: 'flash',
+    version: 'GLM-4-Flash',
+    description: '128K tokens, 完全免費',
+    price: '免費'
+  },
+  { 
+    id: 'glm-4-air', 
+    name: 'GLM-4-Air', 
+    icon: 'airplane',
+    version: 'GLM-4-Air',
+    description: '128K tokens, 高速低價',
+    price: '低價'
+  },
+  
+  // ===== 通义千问系列 =====
+  { 
+    id: 'qwen3-max', 
+    name: 'Qwen3-Max', 
     icon: 'chat',
     version: 'Qwen3-Max',
-    description: '128K tokens, 阿里最強'
+    description: '128K tokens, 阿里最強',
+    price: '標準'
   },
   { 
-    id: 'deepseek', 
-    name: 'DeepSeek', 
+    id: 'qwen3-72b', 
+    name: 'Qwen3-72B', 
+    icon: 'chat',
+    version: 'Qwen3-72B',
+    description: '128K tokens, 開源強大',
+    price: '免費'
+  },
+  { 
+    id: 'qwen3-32b', 
+    name: 'Qwen3-32B', 
+    icon: 'chat',
+    version: 'Qwen3-32B',
+    description: '128K tokens, 輕量快速',
+    price: '免費'
+  },
+  
+  // ===== DeepSeek 系列 =====
+  { 
+    id: 'deepseek-v3.2', 
+    name: 'DeepSeek V3.2', 
     icon: 'anchor',
     version: 'V3.2',
-    description: '64K tokens, 性價比高'
+    description: '64K tokens, 日常對話',
+    price: '低價'
+  },
+  { 
+    id: 'deepseek-reasoner', 
+    name: 'DeepSeek Reasoner', 
+    icon: 'thinking',
+    version: 'V3.2 Reasoner',
+    description: '64K tokens, 深度思考',
+    price: '低價'
   },
 ];
 
@@ -116,3 +251,9 @@ export const hasAPIKey = async (model: AIModel): Promise<boolean> => {
   const keys = await getAPIKeys();
   return !!keys[model];
 };
+
+// 按價格分組獲取模型
+export const getFreeModels = () => AI_MODELS.filter(m => m.price === '免費');
+export const getLowPriceModels = () => AI_MODELS.filter(m => m.price === '低價');
+export const getStandardModels = () => AI_MODELS.filter(m => m.price === '標準');
+export const getPremiumModels = () => AI_MODELS.filter(m => m.price === '高價');
