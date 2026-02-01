@@ -1,7 +1,7 @@
 {
   "version": "1.2.0",
   "buildNumber": "3",
-  "downloadUrl": "https://expo.dev/accounts/ds573949554/projects/lobster-app/builds/latest",
+  "downloadUrl": "https://expo.dev/accounts/ds573949554/projects/lobster-app/builds/7bacdeeb-0a9d-47f1-bf5c-3a4fbfa4e298",
   "releaseNotes": "🤖 新增 7+ AI 模型支持 (Gemini, GPT, Kimi, Claude, GLM, Qwen, DeepSeek)\n🔊 新增語音朗讀功能\n🔄 新增 App 內自動更新\n✨ 優化界面體驗",
   "forceUpdate": false,
   "minVersion": "1.0.0"
