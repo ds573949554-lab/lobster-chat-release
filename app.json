@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lobster App",
     "slug": "lobster-app",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -17,7 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.lobster.app",
-      "buildNumber": "1.2.0"
+      "buildNumber": "1.3.0"
     },
     "android": {
       "adaptiveIcon": {
