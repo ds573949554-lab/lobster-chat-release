@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lobster App",
     "slug": "lobster-app",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -17,7 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.lobster.app",
-      "buildNumber": "1.0.0"
+      "buildNumber": "1.2.0"
     },
     "android": {
       "adaptiveIcon": {
@@ -25,7 +25,13 @@
         "backgroundColor": "#FF6B35"
       },
       "package": "com.lobster.app",
-      "versionCode": 1
+      "versionCode": 3,
+      "permissions": [
+        "INTERNET",
+        "REQUEST_INSTALL_PACKAGES",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,6 +40,14 @@
       "eas": {
         "projectId": "f768d791-0798-4e61-8a77-9680a4442589"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-speech",
+        {
+          "iosAllowSpeechRecognition": true
+        }
+      ]
+    ]
   }
 }
