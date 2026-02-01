@@ -1,0 +1,63 @@
+name: Build APK with Turtle
+
+on:
+  push:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        npm ci
+        npm install -g turtle-cli
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Build APK
+      run: |
+        turtle setup:android
+        turtle build:android \
+          --type apk \
+          -o ./build/lobster-app.apk
+      env:
+        EXPO_SDK_VERSION: "50.0.0"
+        
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: lobster-app-apk
+        path: |
+          ./build/*.apk
+          ./android/app/build/outputs/apk/release/*.apk
+          
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: github.ref == 'refs/heads/main' && success()
+      with:
+        files: ./build/*.apk
+        tag_name: v${{ github.run_number }}
+        name: Lobster App Build ${{ github.run_number }}
+        body: |
+          🦞 龍蝦仔APP自動構建
+          
+          構建時間: ${{ github.event.head_commit.timestamp }}
+          
+          安裝說明:
+          1. 下載 APK 文件
+          2. 在Android設備上安裝
+          3. 允許"未知來源"安裝
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
