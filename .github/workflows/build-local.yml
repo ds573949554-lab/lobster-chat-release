@@ -1,0 +1,64 @@
+name: Build APK (Local)
+
+on:
+  push:
+    branches: [ main, feature/* ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Prebuild Android
+      run: npx expo prebuild --platform android
+    
+    - name: Build APK with Gradle
+      working-directory: ./android
+      run: |
+        chmod +x ./gradlew
+        ./gradlew assembleRelease
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: lobster-app-release
+        path: android/app/build/outputs/apk/release/*.apk
+    
+    - name: Create Release
+      if: github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: android/app/build/outputs/apk/release/*.apk
+        tag_name: v${{ github.run_number }}
+        name: Lobster App v${{ github.run_number }}
+        body: |
+          🦞 龍蝦仔APP自動構建
+          
+          構建時間: ${{ github.event.head_commit.timestamp }}
+          提交: ${{ github.sha }}
+          
+          安裝說明:
+          1. 下載 APK 文件
+          2. 在Android設備上安裝
+          3. 允許"未知來源"安裝
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
