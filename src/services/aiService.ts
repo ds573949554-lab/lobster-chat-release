@@ -10,11 +10,11 @@ export interface AIResponse {
   error?: string;
 }
 
-// Google Gemini API
+// Google Gemini 2.5 Pro Preview API
 const callGemini = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-02-01:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
@@ -26,6 +26,10 @@ const callGemini = async (message: string, apiKey: string): Promise<AIResponse> 
               parts: [{ text: message }],
             },
           ],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 8192,
+          },
         }),
       }
     );
@@ -43,7 +47,7 @@ const callGemini = async (message: string, apiKey: string): Promise<AIResponse> 
   }
 };
 
-// OpenAI GPT API
+// OpenAI GPT-5.2 API
 const callGPT = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -53,8 +57,9 @@ const callGPT = async (message: string, apiKey: string): Promise<AIResponse> => 
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-5.2',
         messages: [{ role: 'user', content: message }],
+        max_tokens: 4096,
       }),
     });
 
@@ -71,7 +76,7 @@ const callGPT = async (message: string, apiKey: string): Promise<AIResponse> => 
   }
 };
 
-// Claude API
+// Claude 3.5 Sonnet API
 const callClaude = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -82,8 +87,8 @@ const callClaude = async (message: string, apiKey: string): Promise<AIResponse> 
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 1024,
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 4096,
         messages: [{ role: 'user', content: message }],
       }),
     });
@@ -101,7 +106,7 @@ const callClaude = async (message: string, apiKey: string): Promise<AIResponse> 
   }
 };
 
-// Kimi (Moonshot) API
+// Kimi K2.5 API
 const callKimi = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
     const response = await fetch('https://api.moonshot.cn/v1/chat/completions', {
@@ -111,8 +116,10 @@ const callKimi = async (message: string, apiKey: string): Promise<AIResponse> =>
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'moonshot-v1-8k',
+        model: 'kimi-k2.5',
         messages: [{ role: 'user', content: message }],
+        temperature: 0.7,
+        max_tokens: 4096,
       }),
     });
 
@@ -129,7 +136,7 @@ const callKimi = async (message: string, apiKey: string): Promise<AIResponse> =>
   }
 };
 
-// 智谱 GLM API
+// 智谱 GLM-4-Plus API
 const callGLM = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
     const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
@@ -139,8 +146,10 @@ const callGLM = async (message: string, apiKey: string): Promise<AIResponse> => 
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'glm-4-flash',
+        model: 'glm-4-plus',
         messages: [{ role: 'user', content: message }],
+        temperature: 0.7,
+        max_tokens: 4096,
       }),
     });
 
@@ -157,37 +166,37 @@ const callGLM = async (message: string, apiKey: string): Promise<AIResponse> => 
   }
 };
 
-// 通义千问 API
+// 通义千问 Qwen2.5-Max API
 const callQwen = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
-    const response = await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
+    const response = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'qwen-turbo',
-        input: {
-          messages: [{ role: 'user', content: message }],
-        },
+        model: 'qwen2.5-max',
+        messages: [{ role: 'user', content: message }],
+        temperature: 0.7,
+        max_tokens: 4096,
       }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      return { text: '', error: error.message || 'Qwen API 錯誤' };
+      return { text: '', error: error.error?.message || 'Qwen API 錯誤' };
     }
 
     const data = await response.json();
-    const text = data.output?.text || '無回應';
+    const text = data.choices?.[0]?.message?.content || '無回應';
     return { text };
   } catch (error) {
     return { text: '', error: '連接通义千问失敗: ' + (error as Error).message };
   }
 };
 
-// DeepSeek API
+// DeepSeek-V3 API
 const callDeepSeek = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -199,6 +208,8 @@ const callDeepSeek = async (message: string, apiKey: string): Promise<AIResponse
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [{ role: 'user', content: message }],
+        temperature: 0.7,
+        max_tokens: 4096,
       }),
     });
 

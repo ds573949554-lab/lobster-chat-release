@@ -15,14 +15,63 @@ export interface APIKeys {
   deepseek?: string;
 }
 
-export const AI_MODELS: { id: AIModel; name: string; icon: string }[] = [
-  { id: 'gemini', name: 'Google Gemini', icon: 'google' },
-  { id: 'gpt', name: 'OpenAI GPT', icon: 'openai' },
-  { id: 'kimi', name: 'Kimi (Moonshot)', icon: 'star' },
-  { id: 'claude', name: 'Claude (Anthropic)', icon: 'triangle' },
-  { id: 'glm', name: '智谱 GLM', icon: 'brain' },
-  { id: 'qwen', name: '通义千问', icon: 'chat' },
-  { id: 'deepseek', name: 'DeepSeek', icon: 'anchor' },
+// 2026年2月最新模型列表
+export const AI_MODELS: { 
+  id: AIModel; 
+  name: string; 
+  icon: string;
+  version: string;
+  description: string;
+}[] = [
+  { 
+    id: 'gemini', 
+    name: 'Google Gemini', 
+    icon: 'google',
+    version: '2.5 Pro Preview',
+    description: '1M+ tokens, 最強多模態'
+  },
+  { 
+    id: 'gpt', 
+    name: 'OpenAI GPT', 
+    icon: 'openai',
+    version: 'GPT-5.2',
+    description: '256K tokens, 最強編程'
+  },
+  { 
+    id: 'kimi', 
+    name: 'Kimi (Moonshot)', 
+    icon: 'star',
+    version: 'K2.5',
+    description: '256K tokens, 中文最強'
+  },
+  { 
+    id: 'claude', 
+    name: 'Claude (Anthropic)', 
+    icon: 'triangle',
+    version: '3.5 Sonnet',
+    description: '200K tokens, 精準安全'
+  },
+  { 
+    id: 'glm', 
+    name: '智谱 GLM', 
+    icon: 'brain',
+    version: 'GLM-4-Plus',
+    description: '128K tokens, 完全免費'
+  },
+  { 
+    id: 'qwen', 
+    name: '通义千问', 
+    icon: 'chat',
+    version: 'Qwen2.5-Max',
+    description: '128K tokens, 阿里最強'
+  },
+  { 
+    id: 'deepseek', 
+    name: 'DeepSeek', 
+    icon: 'anchor',
+    version: 'DeepSeek-V3',
+    description: '64K tokens, 性價比高'
+  },
 ];
 
 export const saveAPIKeys = async (keys: APIKeys): Promise<void> => {

@@ -90,8 +90,8 @@ export default function SettingsScreen() {
         {AI_MODELS.map((model) => (
           <List.Item
             key={model.id}
-            title={model.name}
-            description={getModelStatus(model.id)}
+            title={`${model.name} ${model.version}`}
+            description={`${model.description} · ${getModelStatus(model.id)}`}
             left={() => (
               <List.Icon 
                 icon={model.icon} 
