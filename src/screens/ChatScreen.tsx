@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, Alert } from 'react-native';
-import { Text, TextInput, Button, Card, Chip } from 'react-native-paper';
+import { View, StyleSheet, FlatList, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
+import { Text, TextInput, Button, Card, Chip, IconButton } from 'react-native-paper';
 import { callAI, AIResponse } from '../services/aiService';
+import { speak, stop, isSpeaking } from '../services/speechService';
 import { getAPIKeys, getSelectedModel, AIModel, AI_MODELS } from '../stores/apiKeys';
 
 interface Message {
@@ -25,6 +26,8 @@ export default function ChatScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState<AIModel | null>(null);
   const [apiKeys, setApiKeys] = useState<Record<AIModel, string>>({} as Record<AIModel, string>);
+  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
+  const [autoSpeak, setAutoSpeak] = useState(true);
 
   useEffect(() => {
     loadSettings();
@@ -35,6 +38,35 @@ export default function ChatScreen() {
     const keys = await getAPIKeys();
     setSelectedModel(model);
     setApiKeys(keys as Record<AIModel, string>);
+  };
+
+  const handleSpeak = async (text: string, messageId: string) => {
+    try {
+      // 如果正在播放同一條消息，就停止
+      if (speakingMessageId === messageId) {
+        await stop();
+        setSpeakingMessageId(null);
+        return;
+      }
+
+      // 停止當前播放
+      await stop();
+      
+      // 播放新消息
+      setSpeakingMessageId(messageId);
+      await speak(text, {
+        language: 'zh-CN',
+        rate: 1.1,
+        pitch: 1.0,
+        onDone: () => {
+          setSpeakingMessageId(null);
+        },
+      });
+    } catch (error) {
+      console.error('Speech error:', error);
+      setSpeakingMessageId(null);
+      Alert.alert('語音播放失敗', '請檢查設備權限設置');
+    }
   };
 
   const sendMessage = async () => {
@@ -77,6 +109,13 @@ export default function ChatScreen() {
       };
 
       setMessages((prev) => [...prev, aiMessage]);
+
+      // 自動播放 AI 回應（如果開啟）
+      if (autoSpeak && !response.error && response.text) {
+        setTimeout(() => {
+          handleSpeak(response.text, aiMessage.id);
+        }, 500);
+      }
     } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -111,6 +150,24 @@ export default function ChatScreen() {
         ]}>
           {item.text}
         </Text>
+        
+        {/* AI 消息顯示語音按鈕 */}
+        {!item.isUser && !item.error && (
+          <TouchableOpacity
+            style={styles.voiceButton}
+            onPress={() => handleSpeak(item.text, item.id)}
+          >
+            <IconButton
+              icon={speakingMessageId === item.id ? 'stop' : 'volume-high'}
+              size={20}
+              iconColor={speakingMessageId === item.id ? '#FF6B35' : '#666'}
+              style={styles.voiceIcon}
+            />
+            <Text style={styles.voiceText}>
+              {speakingMessageId === item.id ? '停止' : '朗讀'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </Card.Content>
     </Card>
   );
@@ -126,9 +183,25 @@ export default function ChatScreen() {
         >
           {getModelName()}
         </Chip>
-        {!selectedModel && (
-          <Text style={styles.warningText}>⚠️ 請到設置配置 API Key</Text>
-        )}
+        <View style={styles.modelBarRight}>
+          {/* 自動朗讀開關 */}
+          <TouchableOpacity
+            style={styles.autoSpeakButton}
+            onPress={() => setAutoSpeak(!autoSpeak)}
+          >
+            <IconButton
+              icon={autoSpeak ? 'volume-high' : 'volume-off'}
+              size={20}
+              iconColor={autoSpeak ? '#FF6B35' : '#999'}
+            />
+            <Text style={[styles.autoSpeakText, autoSpeak && styles.autoSpeakTextActive]}>
+              自動朗讀
+            </Text>
+          </TouchableOpacity>
+          {!selectedModel && (
+            <Text style={styles.warningText}>⚠️ 請到設置配置 API Key</Text>
+          )}
+        </View>
       </View>
 
       <FlatList
@@ -189,6 +262,22 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
+  modelBarRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  autoSpeakButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  autoSpeakText: {
+    fontSize: 12,
+    color: '#999',
+  },
+  autoSpeakTextActive: {
+    color: '#FF6B35',
+  },
   activeModelChip: {
     backgroundColor: '#FFF3E0',
   },
@@ -222,6 +311,22 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: '#f44336',
+  },
+  voiceButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  voiceIcon: {
+    margin: 0,
+    padding: 0,
+  },
+  voiceText: {
+    fontSize: 12,
+    color: '#666',
   },
   loadingContainer: {
     flexDirection: 'row',
