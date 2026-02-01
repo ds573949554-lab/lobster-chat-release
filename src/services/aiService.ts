@@ -212,7 +212,7 @@ const callGPT5Nano = async (message: string, apiKey: string): Promise<AIResponse
   }
 };
 
-// ===== Kimi 系列 =====
+// ===== Kimi 系列 - 官方 API =====
 const callKimiK25 = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
     const response = await fetch('https://api.moonshot.cn/v1/chat/completions', {
@@ -262,6 +262,60 @@ const callKimiK2 = async (message: string, apiKey: string): Promise<AIResponse> 
     return { text: data.choices?.[0]?.message?.content || '無回應' };
   } catch (error) {
     return { text: '', error: '連接 Kimi 失敗: ' + (error as Error).message };
+  }
+};
+
+// ===== Kimi Code 系列 - 第三方 Agent 專用 API =====
+// 使用兼容 API: https://api.moonshot.cn/compatible-api/v1
+const callKimiCodeK25 = async (message: string, apiKey: string): Promise<AIResponse> => {
+  try {
+    const response = await fetch('https://api.moonshot.cn/compatible-api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'kimi-k2.5',
+        messages: [{ role: 'user', content: message }],
+        temperature: 0.7,
+        max_tokens: 4096,
+      }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      return { text: '', error: error.error?.message || 'Kimi Code API 錯誤' };
+    }
+    const data = await response.json();
+    return { text: data.choices?.[0]?.message?.content || '無回應' };
+  } catch (error) {
+    return { text: '', error: '連接 Kimi Code 失敗: ' + (error as Error).message };
+  }
+};
+
+const callKimiCodeK2 = async (message: string, apiKey: string): Promise<AIResponse> => {
+  try {
+    const response = await fetch('https://api.moonshot.cn/compatible-api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'kimi-k2',
+        messages: [{ role: 'user', content: message }],
+        temperature: 0.7,
+        max_tokens: 4096,
+      }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      return { text: '', error: error.error?.message || 'Kimi Code API 錯誤' };
+    }
+    const data = await response.json();
+    return { text: data.choices?.[0]?.message?.content || '無回應' };
+  } catch (error) {
+    return { text: '', error: '連接 Kimi Code 失敗: ' + (error as Error).message };
   }
 };
 
@@ -494,9 +548,12 @@ export const callAI = async (
     'gpt-5': callGPT5,
     'gpt-5-mini': callGPT5Mini,
     'gpt-5-nano': callGPT5Nano,
-    // Kimi
+    // Kimi 官方
     'kimi-k2.5': callKimiK25,
     'kimi-k2': callKimiK2,
+    // Kimi Code (第三方 Agent 專用)
+    'kimi-code-k2.5': callKimiCodeK25,
+    'kimi-code-k2': callKimiCodeK2,
     // GLM
     'glm-4.7': callGLM47,
     'glm-4-flash': callGLM4Flash,

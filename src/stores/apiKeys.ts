@@ -11,8 +11,10 @@ export type AIModel =
   | 'claude-opus-4.5' | 'claude-sonnet-4.5'
   // GPT 系列
   | 'gpt-5' | 'gpt-5-mini' | 'gpt-5-nano'
-  // Kimi 系列
+  // Kimi 系列 - 官方 API
   | 'kimi-k2.5' | 'kimi-k2'
+  // Kimi Code 系列 - 第三方 Agent 專用
+  | 'kimi-code-k2.5' | 'kimi-code-k2'
   // GLM 系列
   | 'glm-4.7' | 'glm-4-flash' | 'glm-4-air'
   // Qwen 系列
@@ -29,8 +31,12 @@ export interface APIKeys {
   'gpt-5'?: string;
   'gpt-5-mini'?: string;
   'gpt-5-nano'?: string;
+  // Kimi 官方 API Key
   'kimi-k2.5'?: string;
   'kimi-k2'?: string;
+  // Kimi Code Key (第三方 Agent 專用)
+  'kimi-code-k2.5'?: string;
+  'kimi-code-k2'?: string;
   'glm-4.7'?: string;
   'glm-4-flash'?: string;
   'glm-4-air'?: string;
@@ -49,6 +55,7 @@ export const AI_MODELS: {
   version: string;
   description: string;
   price: '免費' | '低價' | '標準' | '高價';
+  kimiType?: 'official' | 'code';
 }[] = [
   // ===== Google Gemini 系列 =====
   { 
@@ -120,22 +127,44 @@ export const AI_MODELS: {
     price: '低價'
   },
   
-  // ===== Kimi 系列 =====
+  // ===== Kimi 系列 - 官方 API =====
   { 
     id: 'kimi-k2.5', 
-    name: 'Kimi K2.5', 
+    name: 'Kimi K2.5 (官方)', 
     icon: 'star',
     version: 'K2.5',
-    description: '256K tokens, 中文最強',
-    price: '標準'
+    description: '256K tokens, 國內外通用',
+    price: '標準',
+    kimiType: 'official'
   },
   { 
     id: 'kimi-k2', 
-    name: 'Kimi K2', 
+    name: 'Kimi K2 (官方)', 
     icon: 'star-outline',
     version: 'K2',
-    description: '200K tokens, 性價比高',
-    price: '低價'
+    description: '200K tokens, 國內外通用',
+    price: '低價',
+    kimiType: 'official'
+  },
+  
+  // ===== Kimi Code 系列 - 第三方 Agent 專用 =====
+  { 
+    id: 'kimi-code-k2.5', 
+    name: 'Kimi K2.5 (Code)', 
+    icon: 'code-braces',
+    version: 'K2.5 Code',
+    description: 'Claude Code/Cursor 等專用',
+    price: '標準',
+    kimiType: 'code'
+  },
+  { 
+    id: 'kimi-code-k2', 
+    name: 'Kimi K2 (Code)', 
+    icon: 'code-braces',
+    version: 'K2 Code',
+    description: 'Claude Code/Cursor 等專用',
+    price: '低價',
+    kimiType: 'code'
   },
   
   // ===== 智谱 GLM 系列 =====
@@ -257,3 +286,8 @@ export const getFreeModels = () => AI_MODELS.filter(m => m.price === '免費');
 export const getLowPriceModels = () => AI_MODELS.filter(m => m.price === '低價');
 export const getStandardModels = () => AI_MODELS.filter(m => m.price === '標準');
 export const getPremiumModels = () => AI_MODELS.filter(m => m.price === '高價');
+
+// 獲取 Kimi 官方模型
+export const getKimiOfficialModels = () => AI_MODELS.filter(m => m.kimiType === 'official');
+// 獲取 Kimi Code 模型
+export const getKimiCodeModels = () => AI_MODELS.filter(m => m.kimiType === 'code');
