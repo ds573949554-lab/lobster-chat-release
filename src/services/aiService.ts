@@ -10,11 +10,11 @@ export interface AIResponse {
   error?: string;
 }
 
-// Google Gemini 2.5 Pro Preview API
+// Google Gemini 3 Pro API (2026年最新)
 const callGemini = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-02-01:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
@@ -47,36 +47,7 @@ const callGemini = async (message: string, apiKey: string): Promise<AIResponse> 
   }
 };
 
-// OpenAI GPT-5.2 API
-const callGPT = async (message: string, apiKey: string): Promise<AIResponse> => {
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-5.2',
-        messages: [{ role: 'user', content: message }],
-        max_tokens: 4096,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      return { text: '', error: error.error?.message || 'GPT API 錯誤' };
-    }
-
-    const data = await response.json();
-    const text = data.choices?.[0]?.message?.content || '無回應';
-    return { text };
-  } catch (error) {
-    return { text: '', error: '連接 GPT 失敗: ' + (error as Error).message };
-  }
-};
-
-// Claude 3.5 Sonnet API
+// Anthropic Claude Opus 4.5 API (2026年最新)
 const callClaude = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -87,7 +58,7 @@ const callClaude = async (message: string, apiKey: string): Promise<AIResponse> 
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-opus-4-5-20251124',
         max_tokens: 4096,
         messages: [{ role: 'user', content: message }],
       }),
@@ -103,6 +74,35 @@ const callClaude = async (message: string, apiKey: string): Promise<AIResponse> 
     return { text };
   } catch (error) {
     return { text: '', error: '連接 Claude 失敗: ' + (error as Error).message };
+  }
+};
+
+// OpenAI GPT-5 API (2026年最新統一系統)
+const callGPT = async (message: string, apiKey: string): Promise<AIResponse> => {
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-5',
+        messages: [{ role: 'user', content: message }],
+        max_tokens: 4096,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      return { text: '', error: error.error?.message || 'GPT API 錯誤' };
+    }
+
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content || '無回應';
+    return { text };
+  } catch (error) {
+    return { text: '', error: '連接 GPT-5 失敗: ' + (error as Error).message };
   }
 };
 
@@ -136,7 +136,7 @@ const callKimi = async (message: string, apiKey: string): Promise<AIResponse> =>
   }
 };
 
-// 智谱 GLM-4-Plus API
+// 智谱 GLM-4.7 API (2026年最新)
 const callGLM = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
     const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
@@ -146,7 +146,7 @@ const callGLM = async (message: string, apiKey: string): Promise<AIResponse> => 
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'glm-4-plus',
+        model: 'glm-4.7',
         messages: [{ role: 'user', content: message }],
         temperature: 0.7,
         max_tokens: 4096,
@@ -166,7 +166,7 @@ const callGLM = async (message: string, apiKey: string): Promise<AIResponse> => 
   }
 };
 
-// 通义千问 Qwen2.5-Max API
+// 通义千问 Qwen3-Max API (2026年最新)
 const callQwen = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
     const response = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', {
@@ -176,7 +176,7 @@ const callQwen = async (message: string, apiKey: string): Promise<AIResponse> =>
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'qwen2.5-max',
+        model: 'qwen3-max',
         messages: [{ role: 'user', content: message }],
         temperature: 0.7,
         max_tokens: 4096,
@@ -196,7 +196,7 @@ const callQwen = async (message: string, apiKey: string): Promise<AIResponse> =>
   }
 };
 
-// DeepSeek-V3 API
+// DeepSeek-V3.2 API (2026年最新)
 const callDeepSeek = async (message: string, apiKey: string): Promise<AIResponse> => {
   try {
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -206,7 +206,7 @@ const callDeepSeek = async (message: string, apiKey: string): Promise<AIResponse
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'deepseek-chat', // DeepSeek-V3.2 非思考模式
         messages: [{ role: 'user', content: message }],
         temperature: 0.7,
         max_tokens: 4096,
@@ -235,10 +235,10 @@ export const callAI = async (
   switch (model) {
     case 'gemini':
       return callGemini(message, apiKey);
-    case 'gpt':
-      return callGPT(message, apiKey);
     case 'claude':
       return callClaude(message, apiKey);
+    case 'gpt':
+      return callGPT(message, apiKey);
     case 'kimi':
       return callKimi(message, apiKey);
     case 'glm':

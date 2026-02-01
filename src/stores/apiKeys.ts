@@ -3,13 +3,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const API_KEYS_STORAGE_KEY = '@ai_api_keys';
 const SELECTED_MODEL_STORAGE_KEY = '@selected_ai_model';
 
-export type AIModel = 'gemini' | 'gpt' | 'kimi' | 'claude' | 'glm' | 'qwen' | 'deepseek';
+export type AIModel = 'gemini' | 'claude' | 'gpt' | 'kimi' | 'glm' | 'qwen' | 'deepseek';
 
 export interface APIKeys {
   gemini?: string;
+  claude?: string;
   gpt?: string;
   kimi?: string;
-  claude?: string;
   glm?: string;
   qwen?: string;
   deepseek?: string;
@@ -27,15 +27,22 @@ export const AI_MODELS: {
     id: 'gemini', 
     name: 'Google Gemini', 
     icon: 'google',
-    version: '2.5 Pro Preview',
-    description: '1M+ tokens, 最強多模態'
+    version: '3 Pro',
+    description: '2M+ tokens, 最強多模態'
+  },
+  { 
+    id: 'claude', 
+    name: 'Claude', 
+    icon: 'triangle',
+    version: 'Opus 4.5',
+    description: '200K tokens, 世界最強編程'
   },
   { 
     id: 'gpt', 
     name: 'OpenAI GPT', 
     icon: 'openai',
-    version: 'GPT-5.2',
-    description: '256K tokens, 最強編程'
+    version: 'GPT-5',
+    description: '256K tokens, 統一系統'
   },
   { 
     id: 'kimi', 
@@ -45,31 +52,24 @@ export const AI_MODELS: {
     description: '256K tokens, 中文最強'
   },
   { 
-    id: 'claude', 
-    name: 'Claude (Anthropic)', 
-    icon: 'triangle',
-    version: '3.5 Sonnet',
-    description: '200K tokens, 精準安全'
-  },
-  { 
     id: 'glm', 
     name: '智谱 GLM', 
     icon: 'brain',
-    version: 'GLM-4-Plus',
+    version: 'GLM-4.7',
     description: '128K tokens, 完全免費'
   },
   { 
     id: 'qwen', 
     name: '通义千问', 
     icon: 'chat',
-    version: 'Qwen2.5-Max',
+    version: 'Qwen3-Max',
     description: '128K tokens, 阿里最強'
   },
   { 
     id: 'deepseek', 
     name: 'DeepSeek', 
     icon: 'anchor',
-    version: 'DeepSeek-V3',
+    version: 'V3.2',
     description: '64K tokens, 性價比高'
   },
 ];
