@@ -53,6 +53,10 @@ Context: 8K tokens (最長200K)
 - **優點**：中文理解極佳、支持超長文本
 - **適合**：閱讀文檔、中文創作
 - **獲取 API Key**: https://platform.moonshot.cn/
+- **第三方 Agent 支援**: https://www.kimi.com/code/docs/more/third-party-agents.html
+  - 支持 Claude Code、Cursor、Continue 等主流 Coding Agent
+  - 可用 Tab 鍵切換 Kimi K2 Thinking 模型
+  - 提供專屬編程模型 `moonshot-v1-auto`
 
 ---
 
@@ -136,6 +140,44 @@ Context: 64K tokens
 3. 輸入 API Key
 4. 點「選擇」啟用
 5. 返去「對話」即可使用！
+
+---
+
+---
+
+## 🌙 Kimi Code - 第三方 Coding Agent 支援
+
+Kimi 唔止係對話模型，仲可以整合到各種 Coding Agent 入面！
+
+### 支援嘅 Coding Agent
+- **Claude Code** - 用 Tab 鍵切換 Kimi K2 Thinking
+- **Cursor** - 直接選擇 Kimi 模型
+- **Continue** - VS Code 插件
+- **其他 Agent** - 通過 OpenAI 兼容 API 接入
+
+### 配置方法
+
+#### Claude Code 中使用 Kimi
+```bash
+# 設置環境變量
+export ANTHROPIC_BASE_URL=https://api.moonshot.cn/compatible-api/v1
+export ANTHROPIC_API_KEY=你的_Kimi_API_Key
+
+# 啟動 Claude Code
+claude
+
+# 使用時按 Tab 鍵切換 Kimi K2 Thinking 模型
+```
+
+#### 其他 Agent
+大部分支持 OpenAI 兼容 API 的 Agent，都可以用以下配置：
+```
+Base URL: https://api.moonshot.cn/v1
+Model: moonshot-v1-auto (自動選擇最適合模型)
+```
+
+### 文檔
+📖 https://www.kimi.com/code/docs/more/third-party-agents.html
 
 ---
 
